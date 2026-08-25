@@ -1,0 +1,44 @@
+name: 'DCO Commit Action'
+description: 'Commit with GPG Verified + DCO Signed-off-by signatures'
+branding:
+  icon: 'git-commit'
+  color: 'blue'
+
+inputs:
+  token:
+    description: 'GitHub token'
+    required: true
+    default: ${{ github.token }}
+  repository:
+    description: 'Repository name with owner (e.g., owner/repo)'
+    required: false
+    default: ${{ github.repository }}
+  branch:
+    description: 'Target branch name'
+    required: false
+    default: ${{ github.ref_name }}
+  parent-sha:
+    description: 'Expected parent commit SHA (HEAD of the branch)'
+    required: true
+  files:
+    description: 'Added or modified file paths, comma or space separated'
+    required: false
+  deleted:
+    description: 'Deleted file paths, comma or space separated'
+    required: false
+  headline:
+    description: 'Commit message headline'
+    required: true
+  body:
+    description: 'Commit message body (optional)'
+    required: false
+
+outputs:
+  commit-url:
+    description: 'URL of the created commit'
+  commit-sha:
+    description: 'SHA of the created commit'
+
+runs:
+  using: 'node20'
+  main: 'dist/index.js'

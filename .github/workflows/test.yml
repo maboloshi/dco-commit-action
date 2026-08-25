@@ -1,0 +1,20 @@
+name: Test DCO Commit
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test commit
+        uses: ./
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          parent-sha: ${{ github.sha }}
+          files: "README.md"
+          headline: "test: automated commit from CI"
+          body: "This is a test commit using the DCO Action"
