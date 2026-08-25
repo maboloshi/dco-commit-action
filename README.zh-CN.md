@@ -41,7 +41,7 @@
 | `token` | GitHub 令牌（personal token 或 GitHub App 安装令牌） | 否 | `${{ github.token }}` |
 | `repository` | 仓库全名，格式 `owner/repo` | 否 | `${{ github.repository }}` |
 | `branch` | 目标分支名称 | 否 | `${{ github.ref_name }}` |
-| `parent-sha` | **父提交 SHA**（分支的最新提交） | **是** | - |
+| `parent-sha` | 父提交 SHA（分支的最新提交） | 否 | `${{ github.sha }}` |
 | `files` | 新增或修改的文件路径（逗号或空格分隔） | 否 | - |
 | `deleted` | 删除的文件路径（逗号或空格分隔） | 否 | - |
 | `headline` | 提交消息标题（首行） | **是** | - |

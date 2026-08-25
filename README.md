@@ -41,7 +41,7 @@
 | `token` | GitHub token (classic or GitHub App installation token) | No | `${{ github.token }}` |
 | `repository` | Repository in `owner/repo` format | No | `${{ github.repository }}` |
 | `branch` | Target branch name | No | `${{ github.ref_name }}` |
-| `parent-sha` | **Expected parent commit SHA** (tip of the branch) | **Yes** | - |
+| `parent-sha` | Expected parent commit SHA (tip of the branch) | No | `${{ github.sha }}` |
 | `files` | Added/modified file paths (comma or space separated) | No | - |
 | `deleted` | Deleted file paths (comma or space separated) | No | - |
 | `headline` | Commit message headline (subject line) | **Yes** | - |

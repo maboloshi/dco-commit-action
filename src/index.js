@@ -32,7 +32,7 @@ async function run() {
     const token = core.getInput('token', { required: true });
     const repository = core.getInput('repository') || `${github.context.repo.owner}/${github.context.repo.repo}`;
     const branch = core.getInput('branch') || github.context.refName;
-    const parentSha = core.getInput('parent-sha', { required: true });
+    const parentSha = core.getInput('parent-sha') || github.context.sha;
     const filesInput = core.getInput('files');
     const deletedInput = core.getInput('deleted');
     const headline = core.getInput('headline', { required: true });
