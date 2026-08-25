@@ -39,6 +39,7 @@
 | Input | Description | Required | Default |
 |-------|-------------|----------|---------|
 | `token` | GitHub token (classic or GitHub App installation token) | No | `${{ github.token }}` |
+| `app-slug` | GitHub App slug, **without** `[bot]` **suffix** (e.g., `my-app`). Used to construct DCO signature for bot users when using `create-github-app-token`. If not provided, tries to fetch authenticated user via REST API. | No | - |
 | `repository` | Repository in `owner/repo` format | No | `${{ github.repository }}` |
 | `branch` | Target branch name | No | `${{ github.ref_name }}` |
 | `parent-sha` | Expected parent commit SHA (tip of the branch) | No | `${{ github.sha }}` |
@@ -101,6 +102,7 @@
       uses: maboloshi/dco-commit-action@v1
       with:
         token: ${{ steps.app_token.outputs.token }}
+        app-slug: ${{ steps.app_token.outputs.app-slug }}
         parent-sha: ${{ github.sha }}
         files: "generated/report.json"
         headline: "chore: update daily report"
@@ -134,8 +136,12 @@ We are evaluating built‑in batching for a future release. For now, please mana
 
 **DCO Signature (Signed-off-by)**
 
-- The Action fetches the authenticated user's login and ID via the REST API.
-- It constructs a `Signed-off-by` line:  
+- The Action attempts to obtain the committer identity in the following priority order:
+  1. If `app-slug` is provided, fetches the corresponding GitHub App bot user via `GET /users/{app-slug}[bot]`
+  2. If `app-slug` is not provided, fetches the authenticated user via `GET /user`
+  3. If both attempts fail, uses the fallback identity: `github-actions[bot]`
+
+- It constructs a `Signed-off-by` line in the format:  
   `Signed-off-by: username <userid+username@users.noreply.github.com>`
 - This line is **appended to the commit message body** (after any user‑supplied body).
 - This satisfies the DCO requirement for projects like Kubernetes, Linux, and CNCF projects.

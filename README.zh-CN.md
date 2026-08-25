@@ -39,6 +39,7 @@
 | 参数 | 描述 | 必填 | 默认值 |
 |------|------|------|--------|
 | `token` | GitHub 令牌（personal token 或 GitHub App 安装令牌） | 否 | `${{ github.token }}` |
+| `app-slug` | GitHub App 的 slug，**不带** `[bot]` **后缀**（例如 `my-app`）。当使用 `create-github-app-token` 时，用于为 bot 用户构造 DCO 签名。若未提供，将尝试通过 REST API 获取认证用户信息。 | 否 | - |
 | `repository` | 仓库全名，格式 `owner/repo` | 否 | `${{ github.repository }}` |
 | `branch` | 目标分支名称 | 否 | `${{ github.ref_name }}` |
 | `parent-sha` | 父提交 SHA（分支的最新提交） | 否 | `${{ github.sha }}` |
@@ -101,6 +102,7 @@
       uses: maboloshi/dco-commit-action@v1
       with:
         token: ${{ steps.app_token.outputs.token }}
+        app-slug: ${{ steps.app_token.outputs.app-slug }}
         parent-sha: ${{ github.sha }}
         files: "generated/report.json"
         headline: "chore: 更新每日报告"
@@ -134,10 +136,14 @@
 
 **DCO 签名 (Signed-off-by)**
 
-- Action 通过 REST API 获取认证用户的登录名和 ID。
-- 构造 `Signed-off-by` 行：  
+- Action 按以下优先级获取提交者身份：
+  1. 若提供了 `app-slug`，通过 `GET /users/{app-slug}[bot]` 获取对应的 GitHub App Bot 用户
+  2. 若未提供 `app-slug`，通过 `GET /user` 获取当前认证用户
+  3. 若以上均失败，使用回退身份：`github-actions[bot]`
+
+- 构造 `Signed-off-by` 行，格式为：  
   `Signed-off-by: username <userid+username@users.noreply.github.com>`
-- 这一行会**追加到提交消息的正文末尾**（用户提供的正文之后）。
+- 该行会**追加到提交消息正文末尾**（用户提供的正文之后）。
 - 满足 Kubernetes、Linux、CNCF 等项目的 DCO 要求。
 
 ---

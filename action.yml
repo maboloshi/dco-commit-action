@@ -9,6 +9,9 @@ inputs:
     description: 'GitHub token'
     required: true
     default: ${{ github.token }}
+  app-slug:
+    description: 'GitHub App slug (for bot identification, e.g., my-app)'
+    required: false
   repository:
     description: 'Repository name with owner (e.g., owner/repo)'
     required: false
@@ -40,5 +43,5 @@ outputs:
     description: 'SHA of the created commit'
 
 runs:
-  using: 'node20'
+  using: 'node24'
   main: 'dist/index.js'

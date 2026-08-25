@@ -31849,13 +31849,35 @@ function parseFileList(input) {
 /**
  * Generate DCO Signed-off-by line from authenticated user
  */
-async function getDCOSignature(octokit) {
-  try {
-    const { data: user } = await octokit.rest.users.getAuthenticated();
-    return `Signed-off-by: ${user.login} <${user.id}+${user.login}@users.noreply.github.com>`;
-  } catch {
-    core.warning('Could not fetch user info, using fallback DCO signature');
-    return 'Signed-off-by: github-actions <github-actions@users.noreply.github.com>';
+async function getDCOSignature(octokit, appSlug) {
+  let userInfo = null;
+
+  // 1. 优先使用 app-slug 获取 bot 信息
+  if (appSlug) {
+    try {
+      const botUsername = `${appSlug}[bot]`;
+      const { data: user } = await octokit.rest.users.getByUsername({ username: botUsername });
+      userInfo = user;
+    } catch (error) {
+      core.warning(`Could not fetch bot info for "${appSlug}[bot]", falling back to default user`);
+    }
+  }
+
+  // 2. 尝试获取当前认证用户（个人 token）
+  if (!userInfo) {
+    try {
+      const { data: user } = await octokit.rest.users.getAuthenticated();
+      userInfo = user;
+    } catch (error) {
+      core.warning('Could not fetch current user info, falling back to default');
+    }
+  }
+
+  // 3. 最终 fallback（确保签名总是有效）
+  if (userInfo) {
+    return `Signed-off-by: ${userInfo.login} <${userInfo.id}+${userInfo.login}@users.noreply.github.com>`;
+  } else {
+    return 'Signed-off-by: github-actions[bot] <github-actions@users.noreply.github.com>';
   }
 }
 
@@ -31866,6 +31888,7 @@ async function run() {
   try {
     // ---------- Read inputs ----------
     const token = core.getInput('token', { required: true });
+    const appSlug = core.getInput('app-slug');
     const repository = core.getInput('repository') || `${github.context.repo.owner}/${github.context.repo.repo}`;
     const branch = core.getInput('branch') || github.context.refName;
     const parentSha = core.getInput('parent-sha') || github.context.sha;
@@ -31882,7 +31905,7 @@ async function run() {
     const octokit = github.getOctokit(token);
 
     // ---------- Generate DCO ----------
-    const dcoSignature = await getDCOSignature(octokit);
+    const dcoSignature = await getDCOSignature(octokit, appSlug);
     const fullBody = body ? `${body}\n\n${dcoSignature}` : dcoSignature;
 
     // ---------- Process additions ----------
